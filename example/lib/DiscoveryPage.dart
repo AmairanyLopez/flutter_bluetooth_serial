@@ -71,14 +71,14 @@ class _DiscoveryPage extends State<DiscoveryPage> {
       appBar: AppBar(
         title: isDiscovering
             ? Text('Discovering devices')
-            : Text('Discovered devices'),
+            : Text('Nearby Devices'),
         actions: <Widget>[
           isDiscovering
               ? FittedBox(
                   child: Container(
                     margin: new EdgeInsets.all(16.0),
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6281FF)),
                     ),
                   ),
                 )

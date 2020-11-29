@@ -1,24 +1,50 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:scoped_model/scoped_model.dart';
-
+import 'dart:typed_data';
 import './DiscoveryPage.dart';
 import './SelectBondedDevicePage.dart';
 import './ChatPage.dart';
 import './BackgroundCollectingTask.dart';
 import './BackgroundCollectedPage.dart';
+import 'ChatPage.dart';
 
-// import './helpers/LineChart.dart';
+class _DataWT {
+  int whom;
+  String text;
+
+  _DataWT(this.whom, this.text);
+
+  //Need something here to distinguish temperature and weight
+}
+
+_DataWT carseat_A = _DataWT(1, "two"); //change this for actual bluetooth data
+
+//function to update temperature
+void update_temp(int temp) {
+  if (carseat_A.whom != temp) {
+    carseat_A.whom = temp;
+  }
+}
+//function to update weight
 
 class MainPage extends StatefulWidget {
+  final BluetoothDevice server;
+
+  const MainPage({this.server});
+
   @override
   _MainPage createState() => new _MainPage();
 }
 
 class _MainPage extends State<MainPage> {
-  BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
-
+  static final clientID = 0;
+  BluetoothConnection connection;
+  BluetoothState _bluetoothState = BluetoothState.UNKNOWN; //may not be needed
+  _DataWT Updates;
+  String _messageBuffer = '';
   String _address = "...";
   String _name = "...";
 
@@ -28,6 +54,16 @@ class _MainPage extends State<MainPage> {
   BackgroundCollectingTask _collectingTask;
 
   bool _autoAcceptPairingRequests = false;
+  List<_DataWT> messages = List<_DataWT>();
+
+  final TextEditingController textEditingController =
+      new TextEditingController();
+  final ScrollController listScrollController = new ScrollController();
+
+  bool isConnecting = true;
+  bool get isConnected => connection != null && connection.isConnected;
+
+  bool isDisconnecting = false;
 
   @override
   void initState() {
@@ -87,32 +123,34 @@ class _MainPage extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter Bluetooth Serial'),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(120.0),
+        child: AppBar(
+          centerTitle: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(25),
+            ),
+          ),
+          backgroundColor: Color(0xFF6281ff),
+          title: const Text(
+            'Carseat',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              height: 4,
+              fontWeight: FontWeight.bold,
+              fontSize: 30,
+              color: Colors.white,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ),
       ),
       body: Container(
         child: ListView(
           children: <Widget>[
             Divider(),
-            ListTile(title: const Text('General')),
-            SwitchListTile(
-              title: const Text('Enable Bluetooth'),
-              value: _bluetoothState.isEnabled,
-              onChanged: (bool value) {
-                // Do the request and update with the true value then
-                future() async {
-                  // async lambda seems to not working
-                  if (value)
-                    await FlutterBluetoothSerial.instance.requestEnable();
-                  else
-                    await FlutterBluetoothSerial.instance.requestDisable();
-                }
-
-                future().then((_) {
-                  setState(() {});
-                });
-              },
-            ),
+            ListTile(title: const Text('Connected Car Seats')),
             ListTile(
               title: const Text('Bluetooth status'),
               subtitle: Text(_bluetoothState.toString()),
@@ -123,74 +161,8 @@ class _MainPage extends State<MainPage> {
                 },
               ),
             ),
-            ListTile(
-              title: const Text('Local adapter address'),
-              subtitle: Text(_address),
-            ),
-            ListTile(
-              title: const Text('Local adapter name'),
-              subtitle: Text(_name),
-              onLongPress: null,
-            ),
-            ListTile(
-              title: _discoverableTimeoutSecondsLeft == 0
-                  ? const Text("Discoverable")
-                  : Text(
-                      "Discoverable for ${_discoverableTimeoutSecondsLeft}s"),
-              subtitle: const Text("PsychoX-Luna"),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Checkbox(
-                    value: _discoverableTimeoutSecondsLeft != 0,
-                    onChanged: null,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: null,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.refresh),
-                    onPressed: () async {
-                      print('Discoverable requested');
-                      final int timeout = await FlutterBluetoothSerial.instance
-                          .requestDiscoverable(60);
-                      if (timeout < 0) {
-                        print('Discoverable mode denied');
-                      } else {
-                        print(
-                            'Discoverable mode acquired for $timeout seconds');
-                      }
-                      setState(() {
-                        _discoverableTimeoutTimer?.cancel();
-                        _discoverableTimeoutSecondsLeft = timeout;
-                        _discoverableTimeoutTimer =
-                            Timer.periodic(Duration(seconds: 1), (Timer timer) {
-                          setState(() {
-                            if (_discoverableTimeoutSecondsLeft < 0) {
-                              FlutterBluetoothSerial.instance.isDiscoverable
-                                  .then((isDiscoverable) {
-                                if (isDiscoverable) {
-                                  print(
-                                      "Discoverable after timeout... might be infinity timeout :F");
-                                  _discoverableTimeoutSecondsLeft += 1;
-                                }
-                              });
-                              timer.cancel();
-                              _discoverableTimeoutSecondsLeft = 0;
-                            } else {
-                              _discoverableTimeoutSecondsLeft -= 1;
-                            }
-                          });
-                        });
-                      });
-                    },
-                  )
-                ],
-              ),
-            ),
             Divider(),
-            ListTile(title: const Text('Devices discovery and connection')),
+            ListTile(title: const Text('Pair with a Carseat nearby')),
             SwitchListTile(
               title: const Text('Auto-try specific pin when pairing'),
               subtitle: const Text('Pin 1234'),

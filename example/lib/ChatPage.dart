@@ -13,6 +13,8 @@ class ChatPage extends StatefulWidget {
   _ChatPage createState() => new _ChatPage();
 }
 
+int index_messages = 0;
+
 class _Message {
   int whom;
   String text;
@@ -24,7 +26,7 @@ class _ChatPage extends State<ChatPage> {
   static final clientID = 0;
   BluetoothConnection connection;
 
-  List<_Message> messages = List<_Message>();
+  List<_Message> messages = List<_Message>(2);
   String _messageBuffer = '';
 
   final TextEditingController textEditingController =
@@ -78,7 +80,6 @@ class _ChatPage extends State<ChatPage> {
       connection.dispose();
       connection = null;
     }
-
     super.dispose();
   }
 
@@ -124,36 +125,6 @@ class _ChatPage extends State<ChatPage> {
                   controller: listScrollController,
                   children: list),
             ),
-            Row(
-              children: <Widget>[
-                Flexible(
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 16.0),
-                    child: TextField(
-                      style: const TextStyle(fontSize: 15.0),
-                      controller: textEditingController,
-                      decoration: InputDecoration.collapsed(
-                        hintText: isConnecting
-                            ? 'Wait until connected...'
-                            : isConnected
-                                ? 'Type your message...'
-                                : 'Chat got disconnected',
-                        hintStyle: const TextStyle(color: Colors.grey),
-                      ),
-                      enabled: isConnected,
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(8.0),
-                  child: IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: isConnected
-                          ? () => _sendMessage(textEditingController.text)
-                          : null),
-                ),
-              ],
-            )
           ],
         ),
       ),
@@ -181,6 +152,7 @@ class _ChatPage extends State<ChatPage> {
           backspacesCounter--;
         } else {
           buffer[--bufferIndex] = data[i];
+          print(data[i]);
         }
       }
     }
@@ -188,50 +160,27 @@ class _ChatPage extends State<ChatPage> {
     // Create message if there is new line character
     String dataString = String.fromCharCodes(buffer);
     int index = buffer.indexOf(13);
+    //print(dataString);
     if (~index != 0) {
       setState(() {
-        messages.add(
-          _Message(
-            1,
-            backspacesCounter > 0
-                ? _messageBuffer.substring(
-                    0, _messageBuffer.length - backspacesCounter)
-                : _messageBuffer + dataString.substring(0, index),
-          ),
+        //check here if list is empty, if not empty it
+        messages[index_messages] = new _Message(
+          1,
+          backspacesCounter > 0
+              ? _messageBuffer.substring(
+                  0, _messageBuffer.length - backspacesCounter)
+              : _messageBuffer + dataString.substring(0, index),
         );
         _messageBuffer = dataString.substring(index);
       });
+      (index_messages == 0) ? index_messages = 1 : index_messages = 0;
     } else {
       _messageBuffer = (backspacesCounter > 0
           ? _messageBuffer.substring(
               0, _messageBuffer.length - backspacesCounter)
           : _messageBuffer + dataString);
     }
-  }
-
-  void _sendMessage(String text) async {
-    text = text.trim();
-    textEditingController.clear();
-
-    if (text.length > 0) {
-      try {
-        connection.output.add(utf8.encode(text + "\r\n"));
-        await connection.output.allSent;
-
-        setState(() {
-          messages.add(_Message(clientID, text));
-        });
-
-        Future.delayed(Duration(milliseconds: 333)).then((_) {
-          listScrollController.animateTo(
-              listScrollController.position.maxScrollExtent,
-              duration: Duration(milliseconds: 333),
-              curve: Curves.easeOut);
-        });
-      } catch (e) {
-        // Ignore error, but notify state
-        setState(() {});
-      }
-    }
+    print(messages[messages.length - 1].text);
+    //print(_messageBuffer);
   }
 }
