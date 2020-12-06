@@ -108,14 +108,31 @@ class _ChatPage extends State<ChatPage> {
             : MainAxisAlignment.start,
       );
     }).toList();
-
+    // ? Text('Connecting chat to ' + widget.server.name + '...')
     return Scaffold(
-      appBar: AppBar(
-          title: (isConnecting
-              ? Text('Connecting chat to ' + widget.server.name + '...')
-              : isConnected
-                  ? Text('Live chat with ' + widget.server.name)
-                  : Text('Chat log with ' + widget.server.name))),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(120.0),
+        child: AppBar(
+          centerTitle: true,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(25),
+            ),
+          ),
+          backgroundColor: Color(0xFF6281ff),
+          title: const Text(
+            'Carseat',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              height: 4,
+              fontWeight: FontWeight.bold,
+              fontSize: 30,
+              color: Colors.white,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -152,7 +169,7 @@ class _ChatPage extends State<ChatPage> {
           backspacesCounter--;
         } else {
           buffer[--bufferIndex] = data[i];
-          print(data[i]);
+          //print(data[i]);
         }
       }
     }
@@ -180,7 +197,7 @@ class _ChatPage extends State<ChatPage> {
               0, _messageBuffer.length - backspacesCounter)
           : _messageBuffer + dataString);
     }
-    print(messages[messages.length - 1].text);
+    //print(messages[messages.length - 1].text);
     //print(_messageBuffer);
   }
 }

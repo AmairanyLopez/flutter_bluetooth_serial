@@ -11,30 +11,7 @@ import './BackgroundCollectingTask.dart';
 import './BackgroundCollectedPage.dart';
 import 'ChatPage.dart';
 
-class _DataWT {
-  int whom;
-  String text;
-
-  _DataWT(this.whom, this.text);
-
-  //Need something here to distinguish temperature and weight
-}
-
-_DataWT carseat_A = _DataWT(1, "two"); //change this for actual bluetooth data
-
-//function to update temperature
-void update_temp(int temp) {
-  if (carseat_A.whom != temp) {
-    carseat_A.whom = temp;
-  }
-}
-//function to update weight
-
 class MainPage extends StatefulWidget {
-  final BluetoothDevice server;
-
-  const MainPage({this.server});
-
   @override
   _MainPage createState() => new _MainPage();
 }
@@ -43,7 +20,6 @@ class _MainPage extends State<MainPage> {
   static final clientID = 0;
   BluetoothConnection connection;
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN; //may not be needed
-  _DataWT Updates;
   String _messageBuffer = '';
   String _address = "...";
   String _name = "...";
@@ -54,8 +30,6 @@ class _MainPage extends State<MainPage> {
   BackgroundCollectingTask _collectingTask;
 
   bool _autoAcceptPairingRequests = false;
-  List<_DataWT> messages = List<_DataWT>();
-
   final TextEditingController textEditingController =
       new TextEditingController();
   final ScrollController listScrollController = new ScrollController();
@@ -251,34 +225,8 @@ class _MainPage extends State<MainPage> {
                         },
                       ),
                     );
-
-                    if (selectedDevice != null) {
-                      await _startBackgroundTask(context, selectedDevice);
-                      setState(() {
-                        /* Update for `_collectingTask.inProgress` */
-                      });
-                    }
                   }
                 },
-              ),
-            ),
-            ListTile(
-              title: RaisedButton(
-                child: const Text('View background collected data'),
-                onPressed: (_collectingTask != null)
-                    ? () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return ScopedModel<BackgroundCollectingTask>(
-                                model: _collectingTask,
-                                child: BackgroundCollectedPage(),
-                              );
-                            },
-                          ),
-                        );
-                      }
-                    : null,
               ),
             ),
           ],
@@ -295,36 +243,5 @@ class _MainPage extends State<MainPage> {
         },
       ),
     );
-  }
-
-  Future<void> _startBackgroundTask(
-    BuildContext context,
-    BluetoothDevice server,
-  ) async {
-    try {
-      _collectingTask = await BackgroundCollectingTask.connect(server);
-      await _collectingTask.start();
-    } catch (ex) {
-      if (_collectingTask != null) {
-        _collectingTask.cancel();
-      }
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Error occured while connecting'),
-            content: Text("${ex.toString()}"),
-            actions: <Widget>[
-              new FlatButton(
-                child: new Text("Close"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
   }
 }
