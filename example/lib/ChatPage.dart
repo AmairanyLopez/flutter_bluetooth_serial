@@ -1,8 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'dart:convert';
+import 'NotificationsPlugin.dart';
+import 'package:rxdart/subjects.dart';
+import 'dart:io' show File, Platform;
+import 'package:flutter_bluetooth_serial_example/NotificationsPlugin.dart';
 
 class ChatPage extends StatefulWidget {
   final BluetoothDevice server;
@@ -13,7 +18,14 @@ class ChatPage extends StatefulWidget {
   _ChatPage createState() => new _ChatPage();
 }
 
+//create variables to store current temp and weight at all times
+String weight = '';
+String temperature = '';
+int notify = 0;
+int alerted = 0;
+
 int index_messages = 0;
+int new_index=0;
 
 class _Message {
   int whom;
@@ -41,6 +53,10 @@ class _ChatPage extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+
+    notificationPlugin
+        .setListenerForLowerVersions(onNotificationInLowerVersions);
+    notificationPlugin.setOnNotificationClick(onNotificationClick);
 
     BluetoothConnection.toAddress(widget.server.address).then((_connection) {
       print('Connected to the device');
@@ -145,6 +161,13 @@ class _ChatPage extends State<ChatPage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await notificationPlugin.showNotification();
+        },
+        child: Icon(Icons.navigation),
+        backgroundColor: Colors.green,
+      ),
     );
   }
 
@@ -190,6 +213,7 @@ class _ChatPage extends State<ChatPage> {
         );
         _messageBuffer = dataString.substring(index);
       });
+      new_index= index_messages;
       (index_messages == 0) ? index_messages = 1 : index_messages = 0;
     } else {
       _messageBuffer = (backspacesCounter > 0
@@ -197,7 +221,46 @@ class _ChatPage extends State<ChatPage> {
               0, _messageBuffer.length - backspacesCounter)
           : _messageBuffer + dataString);
     }
-    //print(messages[messages.length - 1].text);
-    //print(_messageBuffer);
+    String temporary = messages[new_index].text;
+    //print(temporary);
+    if (temporary.contains('Temp')) {
+      //only update if changed
+      if (temperature != temporary) {
+        temperature = temporary.substring(15);
+        print("temp" + temperature);
+      }
+    } else if (temporary.contains('Weight')) {
+      if (weight != temporary) {
+        weight = temporary.substring(10);
+        print("weight" + weight);
+      }
+    }
+    //set a variable for pushing notifications "notify"
+    //only push notifications when temperature is out of ()range and weight is above 2lb
+    //check the vars are not empty
+    if (temperature != '' && weight != '') {
+      if ((double.parse(temperature) < 45.0 ||
+          double.parse(temperature) > 85.0) &&
+          double.parse(weight) > 4.0) {
+        //check if a notification has been sent out yet
+        if (alerted == 1) {
+          //set the notify to 0 and keep alerted on until change of status
+          notify = 0;
+        } else {
+          notify = 1;
+          alerted = 1;
+          
+          print("This is a notification");
+          notificationPlugin.showNotification();
+
+        }
+      } else {
+        alerted = 0;
+      }
+    }
   }
+
+  onNotificationInLowerVersions(ReceivedNotification receivedNotification) {}
+
+  onNotificationClick(String payload) {}
 }

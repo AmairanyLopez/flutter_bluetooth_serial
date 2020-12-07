@@ -4,22 +4,22 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 import './BluetoothDeviceListEntry.dart';
 
-class DiscoveryPage extends StatefulWidget {
+class PairNewDevice extends StatefulWidget {
   /// If true, discovery starts on page start, otherwise user must press action button.
   final bool start;
 
-  const DiscoveryPage({this.start = true});
+  const PairNewDevice({this.start = true});
 
   @override
-  _DiscoveryPage createState() => new _DiscoveryPage();
+  _PairNewDevice createState() => new _PairNewDevice();
 }
 
-class _DiscoveryPage extends State<DiscoveryPage> {
+class _PairNewDevice extends State<PairNewDevice> {
   StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
   List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
   bool isDiscovering;
 
-  _DiscoveryPage();
+  _PairNewDevice();
 
   @override
   void initState() {
@@ -78,7 +78,8 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                   child: Container(
                     margin: new EdgeInsets.all(16.0),
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6281FF)),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(Color(0xFF6281FF)),
                     ),
                   ),
                 )

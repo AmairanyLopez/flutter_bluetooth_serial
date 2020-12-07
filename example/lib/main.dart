@@ -9,39 +9,39 @@ class ExampleApplication extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: MainPage(),
-      theme: _buildShrineTheme(),
+      theme: _CarseatAppTheme(),
     );
   }
 }
 
-ThemeData _buildShrineTheme() {
+ThemeData _CarseatAppTheme() {
   final ThemeData base = ThemeData.light();
   return base.copyWith(
-    colorScheme: _shrineColorScheme,
-    accentColor: shrineBrown900,
-    primaryColor: shrinePink100,
-    buttonColor: shrinePink100,
-    scaffoldBackgroundColor: shrineBackgroundWhite,
-    cardColor: shrineBackgroundWhite,
-    textSelectionColor: shrinePink100,
-    errorColor: shrineErrorRed,
+    colorScheme: _carseatScheme,
+    accentColor: carseatAccent,
+    primaryColor: carseatPrimary,
+    buttonColor: carseatPrimary,
+    scaffoldBackgroundColor: carseatBackground,
+    cardColor: carseatBackground,
+    textSelectionColor: carseatPrimary,
+    errorColor: carseatRed,
     buttonTheme: const ButtonThemeData(
-      colorScheme: _shrineColorScheme,
+      colorScheme: _carseatScheme,
       textTheme: ButtonTextTheme.normal,
     ),
     primaryIconTheme: _customIconTheme(base.iconTheme),
-    textTheme: _buildShrineTextTheme(base.textTheme),
-    primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
-    accentTextTheme: _buildShrineTextTheme(base.accentTextTheme),
+    textTheme: _CarseatTextTheme(base.textTheme),
+    primaryTextTheme: _CarseatTextTheme(base.primaryTextTheme),
+    accentTextTheme: _CarseatTextTheme(base.accentTextTheme),
     iconTheme: _customIconTheme(base.iconTheme),
   );
 }
 
 IconThemeData _customIconTheme(IconThemeData original) {
-  return original.copyWith(color: shrineBrown900);
+  return original.copyWith(color: carseatAccent);
 }
 
-TextTheme _buildShrineTextTheme(TextTheme base) {
+TextTheme _CarseatTextTheme(TextTheme base) {
   return base
       .copyWith(
         caption: base.caption.copyWith(
@@ -57,38 +57,38 @@ TextTheme _buildShrineTextTheme(TextTheme base) {
       )
       .apply(
         fontFamily: 'Rubik',
-        displayColor: shrineBrown900,
+        displayColor: carseatAccent,
         bodyColor: shrineBrown600,
       );
 }
 
-const ColorScheme _shrineColorScheme = ColorScheme(
-  primary: shrinePink100,
-  primaryVariant: shrineBrown900,
+const ColorScheme _carseatScheme = ColorScheme(
+  primary: carseatPrimary,
+  primaryVariant: carseatAccent,
   secondary: shrinePink50,
-  secondaryVariant: shrineBrown900,
+  secondaryVariant: carseatAccent,
   surface: shrineSurfaceWhite,
-  background: shrineBackgroundWhite,
-  error: shrineErrorRed,
-  onPrimary: shrineBrown900,
-  onSecondary: shrineBrown900,
-  onSurface: shrineBrown900,
-  onBackground: shrineBrown900,
+  background: carseatBackground,
+  error: carseatRed,
+  onPrimary: carseatAccent,
+  onSecondary: carseatAccent,
+  onSurface: carseatAccent,
+  onBackground: carseatAccent,
   onError: shrineSurfaceWhite,
   brightness: Brightness.light,
 );
 
 const Color shrinePink50 = Color(0xFFF9E1DC);
-const Color shrinePink100 = Color(0xFF6281FF);
+const Color carseatPrimary = Color(0xFF6281FF);
 const Color shrinePink300 = Color(0xFFFBB8AC);
 const Color shrinePink400 = Color(0xFFEAA4A4);
 
-const Color shrineBrown900 = Color(0xFFFFFFFF); //white
+const Color carseatAccent = Color(0xFFFFFFFF); //white
 const Color shrineBrown600 = Color(0xFF7D4F52);
 
-const Color shrineErrorRed = Color(0xFFC5032B);
+const Color carseatRed = Color(0xFFC5032B);
 
 const Color shrineSurfaceWhite = Color(0xFFFFFBFA);
-const Color shrineBackgroundWhite = Color(0xFFFCEDC9);
+const Color carseatBackground = Color(0xFFFCEDC9);
 
 const defaultLetterSpacing = 0.05;

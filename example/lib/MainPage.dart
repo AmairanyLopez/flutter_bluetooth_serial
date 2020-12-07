@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'dart:typed_data';
-import './DiscoveryPage.dart';
+import './PairNewDevice.dart';
 import './SelectBondedDevicePage.dart';
 import './ChatPage.dart';
 import './BackgroundCollectingTask.dart';
-import './BackgroundCollectedPage.dart';
 import 'ChatPage.dart';
 
 class MainPage extends StatefulWidget {
@@ -17,8 +16,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPage extends State<MainPage> {
-  static final clientID = 0;
-  BluetoothConnection connection;
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN; //may not be needed
   String _messageBuffer = '';
   String _address = "...";
@@ -30,14 +27,6 @@ class _MainPage extends State<MainPage> {
   BackgroundCollectingTask _collectingTask;
 
   bool _autoAcceptPairingRequests = false;
-  final TextEditingController textEditingController =
-      new TextEditingController();
-  final ScrollController listScrollController = new ScrollController();
-
-  bool isConnecting = true;
-  bool get isConnected => connection != null && connection.isConnected;
-
-  bool isDisconnecting = false;
 
   @override
   void initState() {
@@ -168,7 +157,7 @@ class _MainPage extends State<MainPage> {
                         await Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) {
-                          return DiscoveryPage();
+                          return PairNewDevice();
                         },
                       ),
                     );
